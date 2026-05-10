@@ -16,8 +16,8 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #000000;
-            color: #E0E0E0;
+            background-color: #1e1e2e;  /* fundo mais claro */
+            color: #f0f0f0;
             overflow-x: hidden;
         }
 
@@ -28,7 +28,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             overflow: hidden;
-            background-color: #0a0a0a;
+            background-color: #2a2a3a;
         }
 
         .mini-player iframe {
@@ -42,13 +42,59 @@
             text-align: center;
         }
 
+        .detalhes {
+            background-color: #2c2c3a;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
         .detalhes p {
             font-size: 14px;
-            margin: 4px 0;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .detalhes p strong {
-            color: #4dabf7;
+            color: #ffb347;
+            margin-right: 5px;
+        }
+
+        /* ESTILO ESPECIAL PARA O NÚMERO DA MÚSICA - COM MOLDURA E DESTAQUE */
+        #detalhes-numero {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1.8rem;          /* número maior */
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);   /* fundo escuro semi-transparente */
+            border: 2px solid #ffb347;        /* borda dourada suave */
+            border-radius: 30px;              /* cantos arredondados */
+            padding: 4px 18px;                /* espaço interno da moldura */
+            margin-left: 8px;
+            margin-bottom: 12px;              /* espaço extra abaixo do número */
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            letter-spacing: 1px;
+        }
+
+        /* Ajuste para os outros spans de detalhes (cantor e música) */
+        .detalhes p span:not(#detalhes-numero) {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Cor diferenciada para cantor e música */
+        #detalhes-cantor {
+            color: #7bc5ff;
+            font-weight: bold;
+        }
+
+        #detalhes-musica {
+            color: #f0f0f0;
+            font-weight: bold;
         }
 
         .letra-container {
@@ -58,14 +104,14 @@
         }
 
         .letra {
-            background: #1a1a1a;
+            background: #2c2c3a;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             max-height: 450px;
             min-height: 250px;
             overflow-y: auto;
-            color: #E0E0E0;
+            color: #e0e0e0;
             white-space: pre-wrap;
             word-wrap: break-word;
             font-family: 'Roboto', 'Courier New', monospace;
@@ -78,27 +124,23 @@
             width: 10px;
             height: 10px;
         }
-
         .letra::-webkit-scrollbar-track {
-            background: #0a0a0a;
+            background: #1a1a2a;
             border-radius: 10px;
-            border: 1px solid #333;
+            border: 1px solid #444;
         }
-
         .letra::-webkit-scrollbar-thumb {
-            background: #4dabf7;
+            background: #ffb347;
             border-radius: 10px;
             border: 1px solid #1a1a2e;
         }
-
         .letra::-webkit-scrollbar-thumb:hover {
-            background: #ffd700;
+            background: #ffd966;
             cursor: pointer;
         }
-
         .letra {
             scrollbar-width: thin;
-            scrollbar-color: #4dabf7 #0a0a0a;
+            scrollbar-color: #ffb347 #1a1a2a;
         }
 
         .botoes-acao {
@@ -123,24 +165,22 @@
         }
 
         .voltar-btn { 
-            background: #1a1a2e; 
+            background: #2a2a3a; 
             color: white; 
         }
-        
         .voltar-btn:hover {
-            background: #2a2a4e;
+            background: #3a3a4e;
             transform: scale(1.05);
         }
 
         .favorito-btn { 
             background: transparent; 
-            color: #ff4444; 
+            color: #ff6666; 
             font-size: 20px;
-            border: 2px solid #ff4444;
+            border: 2px solid #ff6666;
         }
-        
         .favorito-btn:hover {
-            background: rgba(255, 68, 68, 0.2);
+            background: rgba(255, 102, 102, 0.2);
             transform: scale(1.05);
         }
 
@@ -149,7 +189,6 @@
             color: white; 
             font-size: 14px;
         }
-        
         .compartilhar-btn:hover {
             background: #128C7E;
             transform: scale(1.05);
@@ -167,17 +206,15 @@
             align-items: center;
             z-index: 1000;
         }
-
         .share-content {
-            background: #1a1a1a;
+            background: #2c2c3a;
             padding: 25px;
             border-radius: 15px;
             text-align: center;
             max-width: 90%;
             position: relative;
-            border: 1px solid #333;
+            border: 1px solid #ffb347;
         }
-
         .share-close {
             position: absolute;
             top: 10px;
@@ -186,20 +223,17 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: #E0E0E0;
+            color: #e0e0e0;
         }
-        
         .share-close:hover {
-            color: #ff6666;
+            color: #ffb347;
         }
-
         .share-image {
             max-width: 300px;
             border-radius: 10px;
             margin: 15px 0;
-            border: 2px solid #333;
+            border: 2px solid #ffb347;
         }
-
         .share-actions button {
             margin: 0 5px;
             padding: 8px 25px;
@@ -210,7 +244,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
         .share-actions button:hover {
             background: #128C7E;
             transform: scale(1.05);
@@ -229,9 +262,8 @@
             align-items: center;
             gap: 15px;
             z-index: 9999;
-            color: #4dabf7;
+            color: #ffb347;
         }
-
         .carregando i {
             font-size: 40px;
         }
@@ -241,13 +273,13 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #1a1a2e;
-            color: #4dabf7;
+            background-color: #2a2a3a;
+            color: #ffb347;
             padding: 10px 20px;
             border-radius: 25px;
             font-size: 14px;
             z-index: 10000;
-            border: 1px solid #4dabf7;
+            border: 1px solid #ffb347;
             animation: fadeOut 2s ease forwards;
         }
 
@@ -257,16 +289,15 @@
             100% { opacity: 0; visibility: hidden; }
         }
 
+        /* Responsividade */
         @media (max-width: 480px) {
             .mini-player { 
                 margin: 10px;
                 max-width: 95%;
             }
-            
             .mini-player iframe {
                 height: 160px;
             }
-            
             .letra {
                 max-height: 400px;
                 min-height: 200px;
@@ -274,13 +305,19 @@
                 font-size: 16px;
                 line-height: 1.6;
             }
-            
             .letra::-webkit-scrollbar {
                 width: 8px;
             }
-            
             .botao {
                 padding: 8px 16px;
+                font-size: 12px;
+            }
+            #detalhes-numero {
+                font-size: 1.4rem;
+                padding: 3px 14px;
+                margin-bottom: 8px;
+            }
+            .detalhes p {
                 font-size: 12px;
             }
         }
@@ -352,13 +389,12 @@
             const artistaLimpo = artista.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const musicaLimpo = musica.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artistaLimpo)}/${encodeURIComponent(musicaLimpo)}`;
-            
             try {
                 const response = await timeoutPromise(2000, fetch(url));
                 if (!response.ok) throw new Error('Não encontrado');
                 const data = await response.json();
                 return data.lyrics || null;
-            } catch (error) {
+            } catch {
                 return null;
             }
         }
@@ -367,37 +403,31 @@
             const artistaLimpo = artista.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const musicaLimpo = musica.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artistaLimpo)}&track_name=${encodeURIComponent(musicaLimpo)}`;
-            
             try {
                 const response = await timeoutPromise(2000, fetch(url));
                 if (!response.ok) throw new Error('Não encontrado');
                 const data = await response.json();
                 return data.syncedLyrics || data.plainLyrics || null;
-            } catch (error) {
+            } catch {
                 return null;
             }
         }
 
         async function buscarLetraVagalume(artista, musica) {
             const url = `https://api.vagalume.com.br/search.php?art=${encodeURIComponent(artista)}&mus=${encodeURIComponent(musica)}&apikey=4d8f8b8a9c2a3b1e5f7g9h2j4k6l8m0n`;
-            
             try {
                 const response = await timeoutPromise(2000, fetch(url));
                 if (!response.ok) throw new Error('Não encontrado');
                 const data = await response.json();
-                
-                if (data.mus && data.mus[0] && data.mus[0].text) {
-                    return data.mus[0].text;
-                }
+                if (data.mus && data.mus[0] && data.mus[0].text) return data.mus[0].text;
                 return null;
-            } catch (error) {
+            } catch {
                 return null;
             }
         }
 
         async function buscarLetraMultiplasFontes(artista, musica) {
             console.log(`Buscando letra para: ${artista} - ${musica}`);
-            
             const statusEl = document.getElementById('loader-status');
             if (statusEl) statusEl.textContent = 'Buscando letra em 3 fontes...';
             
@@ -413,7 +443,6 @@
             if (resultados && Array.isArray(resultados)) {
                 for (const resultado of resultados) {
                     if (resultado.status === 'fulfilled' && resultado.value && typeof resultado.value === 'string' && resultado.value.length > 50) {
-                        console.log('✅ Letra encontrada!');
                         if (statusEl) statusEl.textContent = 'Letra encontrada!';
                         return resultado.value;
                     }
@@ -422,21 +451,17 @@
             
             let letra = await buscarLetraLyricsOvh(artista, musica);
             if (letra && letra.length > 50) return letra;
-            
             letra = await buscarLetraLRCLIB(artista, musica);
             if (letra && letra.length > 50) return letra;
-            
             letra = await buscarLetraVagalume(artista, musica);
             if (letra && letra.length > 50) return letra;
             
-            console.log('❌ Nenhuma fonte encontrou a letra');
             return 'Desculpe, não foi possível encontrar a letra desta música.';
         }
 
         async function buscarVideoYouTube(cantor, musica) {
             const query = `${cantor} ${musica} oficial`;
             const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${encodeURIComponent(query)}&key=${API_KEY}`;
-
             try {
                 const response = await timeoutPromise(3000, fetch(url));
                 if (!response.ok) throw new Error('Falha ao buscar vídeo');
@@ -469,17 +494,14 @@
 
         async function carregarDadosMusica() {
             toggleLoader(true, 'Carregando música...');
-
             const params = new URLSearchParams(window.location.search);
             const numero = parseInt(params.get('numero'), 10);
 
             try {
                 toggleLoader(true, 'Buscando dados da música...');
-                
                 const response = await fetch('songs.json');
                 if (!response.ok) throw new Error('Falha ao carregar dados');
                 const data = await response.json();
-
                 const musica = data.find(m => m.numero === numero);
                 if (!musica) throw new Error('Música não encontrada');
 
@@ -493,7 +515,6 @@
                 toggleLoader(true, 'Buscando vídeo...');
                 const videoId = await buscarVideoYouTube(musica.cantor, musica.musica);
                 const videoContainer = document.getElementById('mini-player-video');
-
                 if (videoId && videoContainer) {
                     videoContainer.innerHTML = `
                         <iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1" 
@@ -521,8 +542,8 @@
             const favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
             const musica = window.musicaAtual;
             if (!musica) return;
-            const musicaJaFavoritada = favoritos.some(f => f.numero === musica.numero);
-            btn.textContent = musicaJaFavoritada ? '❤️' : '🤍';
+            const favoritada = favoritos.some(f => f.numero === musica.numero);
+            btn.textContent = favoritada ? '❤️' : '🤍';
         }
 
         function toggleFavorito() {
@@ -530,10 +551,8 @@
             const favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
             const musica = window.musicaAtual;
             if (!musica) return;
-
-            const musicaJaFavoritada = favoritos.some(f => f.numero === musica.numero);
-
-            if (musicaJaFavoritada) {
+            const favoritada = favoritos.some(f => f.numero === musica.numero);
+            if (favoritada) {
                 const novosFavoritos = favoritos.filter(f => f.numero !== musica.numero);
                 localStorage.setItem('favoritos', JSON.stringify(novosFavoritos));
                 btn.textContent = '🤍';
@@ -555,7 +574,7 @@
             const mensagem = `🎵 *DESCUBRA ESSA MÚSICA!* 🎵\n\n✨ *Música:* ${musica.musica}\n🎤 *Artista:* ${musica.cantor}\n🔢 *Código:* ${musica.numero}`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
         }
-        
+
         function closeShareModal() {
             document.getElementById('shareModal').style.display = 'none';
         }
@@ -564,14 +583,11 @@
             alert('Funcionalidade de download disponível em breve!');
         }
 
-        // Salva um marcador antes de voltar para o index
         document.getElementById('btn-voltar').addEventListener('click', function() {
             localStorage.setItem('retornandoDeDetalhes', 'true');
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarDadosMusica();
-        });
+        document.addEventListener('DOMContentLoaded', carregarDadosMusica);
     </script>
 </body>
 </html>
