@@ -80,10 +80,6 @@
             margin: 5px 0;
         }
 
-        .detalhes p {
-            display: none;
-        }
-
         .info-valores {
             display: flex;
             flex-direction: column;
@@ -111,6 +107,25 @@
             font-size: 18px;
             line-height: 1.8;
             text-align: left;
+        }
+
+        /* Indicador de loading dentro da própria letra */
+        .letra-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: #ffb347;
+            font-style: normal;
+        }
+        .letra-loading i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .letra::-webkit-scrollbar {
@@ -242,23 +257,9 @@
             transform: scale(1.05);
         }
 
+        /* Não usamos mais o overlay global, mas mantemos o estilo caso precise */
         .carregando {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
             display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            z-index: 9999;
-            color: #ffb347;
-        }
-        .carregando i {
-            font-size: 40px;
         }
 
         .feedback {
@@ -297,9 +298,6 @@
                 font-size: 16px;
                 line-height: 1.6;
             }
-            .letra::-webkit-scrollbar {
-                width: 8px;
-            }
             .botao {
                 padding: 8px 16px;
                 font-size: 12px;
@@ -327,11 +325,7 @@
     </style>
 </head>
 <body>
-    <div class="carregando">
-        <i class="fas fa-circle-notch fa-spin"></i>
-        <div>Carregando música...</div>
-        <span id="loader-status">Buscando informações</span>
-    </div>
+    <!-- Removido o overlay global de loading -->
 
     <div class="mini-player">
         <div id="mini-player-video"></div>
@@ -344,21 +338,23 @@
                 <span id="detalhes-cantor">Artista Desconhecido</span>
                 <span id="detalhes-musica">Título Desconhecido</span>
             </div>
-            <p style="display:none;"><strong><i class="fas fa-hashtag"></i> Número:</strong> <span id="detalhes-numero-old">Desconhecido</span></p>
-            <p style="display:none;"><strong><i class="fas fa-microphone-alt"></i> Cantor:</strong> <span id="detalhes-cantor-old">Artista Desconhecido</span></p>
-            <p style="display:none;"><strong><i class="fas fa-music"></i> Música:</strong> <span id="detalhes-musica-old">Título Desconhecido</span></p>
         </div>
 
         <div class="letra-container">
-            <div class="letra" id="detalhes-letra">Letra não disponível.</div>
+            <div class="letra" id="detalhes-letra">
+                <div class="letra-loading">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <span>Carregando letra...</span>
+                </div>
+            </div>
         </div>
 
         <div class="botoes-acao">
             <a href="index.html" class="botao voltar-btn" id="btn-voltar">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
-            <button id="favorito-btn" class="botao favorito-btn" onclick="toggleFavorito()">🤍</button>
-            <button id="compartilhar-btn" class="botao compartilhar-btn" onclick="compartilharWhatsApp()">
+            <button id="favorito-btn" class="botao favorito-btn">🤍</button>
+            <button id="compartilhar-btn" class="botao compartilhar-btn">
                 <i class="fab fa-whatsapp"></i> Compartilhar
             </button>
         </div>
@@ -377,7 +373,7 @@
 
     <script>
         const API_KEY = 'AIzaSyC4kYpqMO4FmC5tsW2SJG4ocmTiS6d2vlM';
-        const VAGALUME_API_KEY = '4d8f8b8a9c2a3b1e5f7g9h2j4k6l8m0n';  // chave pública do Vagalume
+        const VAGALUME_API_KEY = '4d8f8b8a9c2a3b1e5f7g9h2j4k6l8m0n';
 
         function timeoutPromise(ms, promise) {
             return Promise.race([
@@ -386,7 +382,7 @@
             ]);
         }
 
-        // 1. Lyrics.ovh (já existente)
+        // 1. Lyrics.ovh
         async function buscarLetraLyricsOvh(artista, musica) {
             const artistaLimpo = artista.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const musicaLimpo = musica.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -401,7 +397,7 @@
             }
         }
 
-        // 2. LRCLIB (já existente)
+        // 2. LRCLIB
         async function buscarLetraLRCLIB(artista, musica) {
             const artistaLimpo = artista.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const musicaLimpo = musica.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -416,7 +412,7 @@
             }
         }
 
-        // 3. Vagalume (já existente)
+        // 3. Vagalume
         async function buscarLetraVagalume(artista, musica) {
             const url = `https://api.vagalume.com.br/search.php?art=${encodeURIComponent(artista)}&mus=${encodeURIComponent(musica)}&apikey=${VAGALUME_API_KEY}`;
             try {
@@ -432,14 +428,13 @@
             }
         }
 
-        // 4. ChartLyrics (nova fonte - sem chave, XML)
+        // 4. ChartLyrics
         async function buscarLetraChartLyrics(artista, musica) {
             const url = `http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?artist=${encodeURIComponent(artista)}&song=${encodeURIComponent(musica)}`;
             try {
                 const response = await timeoutPromise(2000, fetch(url));
                 if (!response.ok) throw new Error('Não encontrado');
                 const text = await response.text();
-                // parse XML
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(text, "text/xml");
                 const lyricNode = xmlDoc.getElementsByTagName("Lyric")[0];
@@ -452,9 +447,7 @@
             }
         }
 
-        // 5. Genius (via scraping reverso usando API não oficial do Genius)
-        // Usaremos o endpoint público do genius.com/api (que ainda funciona sem chave para buscar letras diretamente pela URL da música)
-        // Estratégia: primeiro busca o ID da música via busca, depois pega a letra pelo caminho /songs/:id
+        // 5. Genius (API não oficial)
         async function buscarLetraGenius(artista, musica) {
             const query = `${artista} ${musica}`;
             const searchUrl = `https://genius.com/api/search?q=${encodeURIComponent(query)}`;
@@ -465,7 +458,6 @@
                 const hits = searchData.response?.hits;
                 if (!hits || hits.length === 0) throw new Error('Nenhum resultado');
                 
-                // pega o primeiro hit que mais se aproxima (título e artista)
                 let targetHit = null;
                 for (const hit of hits) {
                     const result = hit.result;
@@ -488,7 +480,6 @@
                 const songData = await songResp.json();
                 const lyricsHtml = songData.response?.song?.lyrics_html;
                 if (lyricsHtml) {
-                    // Remove tags HTML e decodifica entidades
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = lyricsHtml;
                     let letra = tempDiv.innerText;
@@ -502,51 +493,27 @@
             }
         }
 
-        // Função principal que tenta todas as fontes em paralelo e depois sequencial
+        // Busca letra com múltiplas fontes (sem timeout global, para não atrasar a página)
         async function buscarLetraMultiplasFontes(artista, musica) {
             console.log(`Buscando letra para: ${artista} - ${musica}`);
-            const statusEl = document.getElementById('loader-status');
-            if (statusEl) statusEl.textContent = 'Buscando letra em 5 fontes...';
             
-            // Executa todas em paralelo com timeout global de 4 segundos
-            const resultados = await Promise.race([
-                Promise.allSettled([
-                    buscarLetraLyricsOvh(artista, musica),
-                    buscarLetraLRCLIB(artista, musica),
-                    buscarLetraVagalume(artista, musica),
-                    buscarLetraChartLyrics(artista, musica),
-                    buscarLetraGenius(artista, musica)
-                ]),
-                new Promise((resolve) => setTimeout(() => resolve(null), 4500))
-            ]);
+            const fonts = [
+                buscarLetraLyricsOvh,
+                buscarLetraLRCLIB,
+                buscarLetraVagalume,
+                buscarLetraChartLyrics,
+                buscarLetraGenius
+            ];
             
-            if (resultados && Array.isArray(resultados)) {
-                for (const resultado of resultados) {
-                    if (resultado.status === 'fulfilled' && resultado.value && typeof resultado.value === 'string' && resultado.value.length > 50) {
-                        console.log('✅ Letra encontrada!');
-                        if (statusEl) statusEl.textContent = 'Letra encontrada!';
-                        return resultado.value;
-                    }
+            // Executa em paralelo e pega a primeira que retornar com sucesso
+            const results = await Promise.allSettled(fonts.map(fn => fn(artista, musica)));
+            
+            for (const result of results) {
+                if (result.status === 'fulfilled' && result.value && result.value.length > 50) {
+                    return result.value;
                 }
             }
             
-            // Se nada funcionou em paralelo, tenta sequencialmente com fontes adicionais
-            let letra = await buscarLetraLyricsOvh(artista, musica);
-            if (letra && letra.length > 50) return letra;
-            
-            letra = await buscarLetraLRCLIB(artista, musica);
-            if (letra && letra.length > 50) return letra;
-            
-            letra = await buscarLetraVagalume(artista, musica);
-            if (letra && letra.length > 50) return letra;
-            
-            letra = await buscarLetraChartLyrics(artista, musica);
-            if (letra && letra.length > 50) return letra;
-            
-            letra = await buscarLetraGenius(artista, musica);
-            if (letra && letra.length > 50) return letra;
-            
-            console.log('❌ Nenhuma fonte encontrou a letra');
             return 'Desculpe, não foi possível encontrar a letra desta música.';
         }
 
@@ -565,13 +532,6 @@
             }
         }
 
-        function toggleLoader(show, status = '') {
-            const loader = document.querySelector('.carregando');
-            const statusEl = document.getElementById('loader-status');
-            if (loader) loader.style.display = show ? 'flex' : 'none';
-            if (statusEl && status) statusEl.textContent = status;
-        }
-
         function mostrarFeedback(mensagem) {
             const feedback = document.createElement('div');
             feedback.className = 'feedback';
@@ -583,13 +543,11 @@
             }, 2000);
         }
 
-        async function carregarDadosMusica() {
-            toggleLoader(true, 'Carregando música...');
+        // Função que carrega apenas os dados essenciais (sem esperar letra)
+        async function carregarMusicaEssencial() {
             const params = new URLSearchParams(window.location.search);
             const numero = parseInt(params.get('numero'), 10);
-
             try {
-                toggleLoader(true, 'Buscando dados da música...');
                 const response = await fetch('songs.json');
                 if (!response.ok) throw new Error('Falha ao carregar dados');
                 const data = await response.json();
@@ -600,35 +558,34 @@
                 document.getElementById('detalhes-cantor').textContent = musica.cantor;
                 document.getElementById('detalhes-musica').textContent = musica.musica;
 
-                document.getElementById('detalhes-numero-old').textContent = musica.numero;
-                document.getElementById('detalhes-cantor-old').textContent = musica.cantor;
-                document.getElementById('detalhes-musica-old').textContent = musica.musica;
-
-                const letra = await buscarLetraMultiplasFontes(musica.cantor, musica.musica);
-                document.getElementById('detalhes-letra').textContent = letra;
-
-                toggleLoader(true, 'Buscando vídeo...');
-                const videoId = await buscarVideoYouTube(musica.cantor, musica.musica);
-                const videoContainer = document.getElementById('mini-player-video');
-                if (videoId && videoContainer) {
-                    videoContainer.innerHTML = `
-                        <iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; encrypted-media; gyroscope" 
-                                allowfullscreen>
-                        </iframe>
-                    `;
-                } else if (videoContainer) {
-                    videoContainer.innerHTML = '<p style="color:#E0E0E0; text-align:center; padding:20px;">Nenhum vídeo encontrado.</p>';
-                }
-
                 window.musicaAtual = musica;
                 atualizarEstadoFavorito();
+
+                // Carrega o vídeo (assíncrono, sem travar)
+                buscarVideoYouTube(musica.cantor, musica.musica).then(videoId => {
+                    const videoContainer = document.getElementById('mini-player-video');
+                    if (videoId && videoContainer) {
+                        videoContainer.innerHTML = `
+                            <iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; encrypted-media; gyroscope" 
+                                    allowfullscreen>
+                            </iframe>
+                        `;
+                    } else if (videoContainer) {
+                        videoContainer.innerHTML = '<p style="color:#E0E0E0; text-align:center; padding:20px;">Nenhum vídeo encontrado.</p>';
+                    }
+                });
+
+                // Busca a letra em segundo plano e atualiza o container
+                buscarLetraMultiplasFontes(musica.cantor, musica.musica).then(letra => {
+                    const letraDiv = document.getElementById('detalhes-letra');
+                    letraDiv.innerHTML = letra.replace(/\n/g, '<br>');
+                });
+
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Erro ao carregar a música. Tente novamente.');
-            } finally {
-                toggleLoader(false);
             }
         }
 
@@ -678,11 +635,14 @@
             alert('Funcionalidade de download disponível em breve!');
         }
 
+        // Event listeners
+        document.getElementById('favorito-btn').addEventListener('click', toggleFavorito);
+        document.getElementById('compartilhar-btn').addEventListener('click', compartilharWhatsApp);
         document.getElementById('btn-voltar').addEventListener('click', function() {
             localStorage.setItem('retornandoDeDetalhes', 'true');
         });
 
-        document.addEventListener('DOMContentLoaded', carregarDadosMusica);
+        document.addEventListener('DOMContentLoaded', carregarMusicaEssencial);
     </script>
 </body>
 </html>
