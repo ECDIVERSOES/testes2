@@ -49,23 +49,21 @@
             margin-bottom: 15px;
         }
 
-        /* NÚMERO COM MOLDURA - MAIOR AINDA */
         #detalhes-numero {
             color: #ffffff;
             font-weight: bold;
-            font-size: 2rem;          /* aumentado */
+            font-size: 2rem;
             text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid #ffb347;
             border-radius: 40px;
             padding: 6px 24px;
             display: inline-block;
-            margin-bottom: 20px;       /* espaçamento abaixo do número */
+            margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
             letter-spacing: 1px;
         }
 
-        /* CANTOR - AUMENTADO */
         #detalhes-cantor {
             font-size: 1.3rem;
             font-weight: bold;
@@ -74,7 +72,6 @@
             margin: 10px 0 5px;
         }
 
-        /* MÚSICA - AUMENTADA */
         #detalhes-musica {
             font-size: 1.2rem;
             font-weight: bold;
@@ -83,12 +80,10 @@
             margin: 5px 0;
         }
 
-        /* Remove os parágrafos antigos e seus textos, usamos apenas os spans agora */
         .detalhes p {
-            display: none;  /* esconde os parágrafos com os rótulos */
+            display: none;
         }
 
-        /* Exibe os valores em um layout personalizado */
         .info-valores {
             display: flex;
             flex-direction: column;
@@ -344,15 +339,11 @@
 
     <div class="conteudo-detalhes">
         <div class="detalhes">
-            <!-- Os parágrafos originais foram ocultados pelo CSS, mas ainda estão na estrutura.
-                 Para manter o layout limpo, substituímos por um container personalizado 
-                 que exibe apenas os valores -->
             <div class="info-valores">
                 <span id="detalhes-numero">Desconhecido</span>
                 <span id="detalhes-cantor">Artista Desconhecido</span>
                 <span id="detalhes-musica">Título Desconhecido</span>
             </div>
-            <!-- Parágrafos antigos mantidos apenas para compatibilidade, mas escondidos via CSS -->
             <p style="display:none;"><strong><i class="fas fa-hashtag"></i> Número:</strong> <span id="detalhes-numero-old">Desconhecido</span></p>
             <p style="display:none;"><strong><i class="fas fa-microphone-alt"></i> Cantor:</strong> <span id="detalhes-cantor-old">Artista Desconhecido</span></p>
             <p style="display:none;"><strong><i class="fas fa-music"></i> Música:</strong> <span id="detalhes-musica-old">Título Desconhecido</span></p>
@@ -386,6 +377,7 @@
 
     <script>
         const API_KEY = 'AIzaSyC4kYpqMO4FmC5tsW2SJG4ocmTiS6d2vlM';
+        const VAGALUME_API_KEY = '4d8f8b8a9c2a3b1e5f7g9h2j4k6l8m0n';  // chave pública do Vagalume
 
         function timeoutPromise(ms, promise) {
             return Promise.race([
@@ -394,6 +386,7 @@
             ]);
         }
 
+        // 1. Lyrics.ovh (já existente)
         async function buscarLetraLyricsOvh(artista, musica) {
             const artistaLimpo = artista.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const musicaLimpo = musica.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -408,6 +401,7 @@
             }
         }
 
+        // 2. LRCLIB (já existente)
         async function buscarLetraLRCLIB(artista, musica) {
             const artistaLimpo = artista.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
             const musicaLimpo = musica.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -422,49 +416,137 @@
             }
         }
 
+        // 3. Vagalume (já existente)
         async function buscarLetraVagalume(artista, musica) {
-            const url = `https://api.vagalume.com.br/search.php?art=${encodeURIComponent(artista)}&mus=${encodeURIComponent(musica)}&apikey=4d8f8b8a9c2a3b1e5f7g9h2j4k6l8m0n`;
+            const url = `https://api.vagalume.com.br/search.php?art=${encodeURIComponent(artista)}&mus=${encodeURIComponent(musica)}&apikey=${VAGALUME_API_KEY}`;
             try {
                 const response = await timeoutPromise(2000, fetch(url));
                 if (!response.ok) throw new Error('Não encontrado');
                 const data = await response.json();
-                if (data.mus && data.mus[0] && data.mus[0].text) return data.mus[0].text;
+                if (data.mus && data.mus[0] && data.mus[0].text) {
+                    return data.mus[0].text;
+                }
                 return null;
             } catch {
                 return null;
             }
         }
 
+        // 4. ChartLyrics (nova fonte - sem chave, XML)
+        async function buscarLetraChartLyrics(artista, musica) {
+            const url = `http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?artist=${encodeURIComponent(artista)}&song=${encodeURIComponent(musica)}`;
+            try {
+                const response = await timeoutPromise(2000, fetch(url));
+                if (!response.ok) throw new Error('Não encontrado');
+                const text = await response.text();
+                // parse XML
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+                const lyricNode = xmlDoc.getElementsByTagName("Lyric")[0];
+                if (lyricNode && lyricNode.textContent && lyricNode.textContent.length > 50) {
+                    return lyricNode.textContent;
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+
+        // 5. Genius (via scraping reverso usando API não oficial do Genius)
+        // Usaremos o endpoint público do genius.com/api (que ainda funciona sem chave para buscar letras diretamente pela URL da música)
+        // Estratégia: primeiro busca o ID da música via busca, depois pega a letra pelo caminho /songs/:id
+        async function buscarLetraGenius(artista, musica) {
+            const query = `${artista} ${musica}`;
+            const searchUrl = `https://genius.com/api/search?q=${encodeURIComponent(query)}`;
+            try {
+                const searchResp = await timeoutPromise(2000, fetch(searchUrl));
+                if (!searchResp.ok) throw new Error('Erro na busca');
+                const searchData = await searchResp.json();
+                const hits = searchData.response?.hits;
+                if (!hits || hits.length === 0) throw new Error('Nenhum resultado');
+                
+                // pega o primeiro hit que mais se aproxima (título e artista)
+                let targetHit = null;
+                for (const hit of hits) {
+                    const result = hit.result;
+                    const titleNorm = result.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const artistNorm = result.primary_artist.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const musicaNorm = musica.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const artistaNorm = artista.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    if ((titleNorm.includes(musicaNorm) || musicaNorm.includes(titleNorm)) && 
+                        (artistNorm.includes(artistaNorm) || artistaNorm.includes(artistNorm))) {
+                        targetHit = result;
+                        break;
+                    }
+                }
+                if (!targetHit) targetHit = hits[0].result;
+                
+                const songId = targetHit.id;
+                const songUrl = `https://genius.com/api/songs/${songId}`;
+                const songResp = await timeoutPromise(2000, fetch(songUrl));
+                if (!songResp.ok) throw new Error('Erro ao buscar letra');
+                const songData = await songResp.json();
+                const lyricsHtml = songData.response?.song?.lyrics_html;
+                if (lyricsHtml) {
+                    // Remove tags HTML e decodifica entidades
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = lyricsHtml;
+                    let letra = tempDiv.innerText;
+                    if (letra && letra.length > 50) {
+                        return letra.trim();
+                    }
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+
+        // Função principal que tenta todas as fontes em paralelo e depois sequencial
         async function buscarLetraMultiplasFontes(artista, musica) {
             console.log(`Buscando letra para: ${artista} - ${musica}`);
             const statusEl = document.getElementById('loader-status');
-            if (statusEl) statusEl.textContent = 'Buscando letra em 3 fontes...';
+            if (statusEl) statusEl.textContent = 'Buscando letra em 5 fontes...';
             
+            // Executa todas em paralelo com timeout global de 4 segundos
             const resultados = await Promise.race([
                 Promise.allSettled([
                     buscarLetraLyricsOvh(artista, musica),
                     buscarLetraLRCLIB(artista, musica),
-                    buscarLetraVagalume(artista, musica)
+                    buscarLetraVagalume(artista, musica),
+                    buscarLetraChartLyrics(artista, musica),
+                    buscarLetraGenius(artista, musica)
                 ]),
-                new Promise((resolve) => setTimeout(() => resolve(null), 4000))
+                new Promise((resolve) => setTimeout(() => resolve(null), 4500))
             ]);
             
             if (resultados && Array.isArray(resultados)) {
                 for (const resultado of resultados) {
                     if (resultado.status === 'fulfilled' && resultado.value && typeof resultado.value === 'string' && resultado.value.length > 50) {
+                        console.log('✅ Letra encontrada!');
                         if (statusEl) statusEl.textContent = 'Letra encontrada!';
                         return resultado.value;
                     }
                 }
             }
             
+            // Se nada funcionou em paralelo, tenta sequencialmente com fontes adicionais
             let letra = await buscarLetraLyricsOvh(artista, musica);
             if (letra && letra.length > 50) return letra;
+            
             letra = await buscarLetraLRCLIB(artista, musica);
             if (letra && letra.length > 50) return letra;
+            
             letra = await buscarLetraVagalume(artista, musica);
             if (letra && letra.length > 50) return letra;
             
+            letra = await buscarLetraChartLyrics(artista, musica);
+            if (letra && letra.length > 50) return letra;
+            
+            letra = await buscarLetraGenius(artista, musica);
+            if (letra && letra.length > 50) return letra;
+            
+            console.log('❌ Nenhuma fonte encontrou a letra');
             return 'Desculpe, não foi possível encontrar a letra desta música.';
         }
 
@@ -514,12 +596,10 @@
                 const musica = data.find(m => m.numero === numero);
                 if (!musica) throw new Error('Música não encontrada');
 
-                // Atualiza os novos elementos
                 document.getElementById('detalhes-numero').textContent = musica.numero;
                 document.getElementById('detalhes-cantor').textContent = musica.cantor;
                 document.getElementById('detalhes-musica').textContent = musica.musica;
 
-                // Atualiza também os antigos (ocultos) para não quebrar referências
                 document.getElementById('detalhes-numero-old').textContent = musica.numero;
                 document.getElementById('detalhes-cantor-old').textContent = musica.cantor;
                 document.getElementById('detalhes-musica-old').textContent = musica.musica;
