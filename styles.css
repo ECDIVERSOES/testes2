@@ -200,13 +200,13 @@ h1 {
 .cantor {
     color: #7bc5ff;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin-top: 4px;        /* pequeno espaçamento extra vindo do número */
 }
 
 .musica {
     color: #f0f0f0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     text-align: left;
 }
 
